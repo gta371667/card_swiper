@@ -127,6 +127,10 @@ class Swiper extends StatefulWidget {
 
   final bool allowImplicitScrolling;
 
+  final double? itemSpace;
+  final double itemOffsetX;
+  final List<double>? scales;
+
   const Swiper({
     this.itemBuilder,
     this.indicatorLayout = PageIndicatorLayout.NONE,
@@ -164,6 +168,9 @@ class Swiper extends StatefulWidget {
     this.scale,
     this.fade,
     this.allowImplicitScrolling = false,
+    this.itemSpace,
+    this.itemOffsetX = 0,
+    this.scales,
   })  : assert(
           itemBuilder != null || transformer != null,
           'itemBuilder and transformItemBuilder must not be both null',
@@ -497,13 +504,15 @@ class _SwiperState extends _SwiperTimerMixin {
         controller: _controller,
         scrollDirection: widget.scrollDirection,
         axisDirection: widget.axisDirection,
+        itemSpace: widget.itemSpace,
+        itemOffsetX: widget.itemOffsetX,
+        scales: widget.scales,
       );
     } else if (_isPageViewLayout()) {
       //default
       var transformer = widget.transformer;
       if (widget.scale != null || widget.fade != null) {
-        transformer =
-            ScaleAndFadeTransformer(scale: widget.scale, fade: widget.fade);
+        transformer = ScaleAndFadeTransformer(scale: widget.scale, fade: widget.fade);
       }
 
       final child = TransformerPageView(
@@ -635,10 +644,8 @@ class _SwiperState extends _SwiperTimerMixin {
     if (widget.pagination != null) {
       config = _ensureConfig(config);
       if (widget.outer) {
-        return _buildOuterPagination(
-            widget.pagination! as SwiperPagination,
-            listForStack == null ? swiper : Stack(children: listForStack),
-            config);
+        return _buildOuterPagination(widget.pagination! as SwiperPagination,
+            listForStack == null ? swiper : Stack(children: listForStack), config);
       } else {
         listForStack = _ensureListForStack(
           swiper: swiper,
@@ -762,6 +769,10 @@ class _TinderSwiper extends _SubSwiper {
 }
 
 class _StackSwiper extends _SubSwiper {
+  final double? itemSpace;
+  final double itemOffsetX;
+  final List<double>? scales;
+
   const _StackSwiper({
     Key? key,
     required Curve curve,
@@ -776,6 +787,9 @@ class _StackSwiper extends _SubSwiper {
     required int itemCount,
     Axis? scrollDirection,
     AxisDirection? axisDirection,
+    this.itemSpace,
+    this.itemOffsetX = 0,
+    this.scales,
   }) : super(
           loop: loop,
           key: key,
@@ -863,9 +877,8 @@ class _TinderState extends _CustomLayoutStateBase<_TinderSwiper> {
     final o = _getValue(opacity, animationValue, i);
     final a = _getValue(rotates, animationValue, i);
 
-    final alignment = widget.scrollDirection == Axis.horizontal
-        ? Alignment.bottomCenter
-        : Alignment.centerLeft;
+    final alignment =
+        widget.scrollDirection == Axis.horizontal ? Alignment.bottomCenter : Alignment.centerLeft;
 
     return Opacity(
       opacity: o,
@@ -901,12 +914,12 @@ class _StackViewState extends _CustomLayoutStateBase<_StackSwiper> {
 
   void _updateValues() {
     if (widget.scrollDirection == Axis.horizontal) {
-      final space = (_swiperWidth - widget.itemWidth!) / 2;
+      final space = widget.itemSpace ?? (_swiperWidth - widget.itemWidth!) / 2;
       offsets = widget.axisDirection == AxisDirection.left
           ? [-space, -space / 3 * 2, -space / 3, 0.0, _swiperWidth]
           : [_swiperWidth, 0.0, -space / 3, -space / 3 * 2, -space];
     } else {
-      final space = (_swiperHeight - widget.itemHeight!) / 2;
+      final space = widget.itemSpace ?? (_swiperHeight - widget.itemHeight!) / 2;
       offsets = [-space, -space / 3 * 2, -space / 3, 0.0, _swiperHeight];
     }
   }
@@ -927,10 +940,8 @@ class _StackViewState extends _CustomLayoutStateBase<_StackSwiper> {
 
     //Array below this line, '0' index is 1.0, which is the first item show in swiper.
     _startIndex = isRightSide ? -1 : -3;
-    scales =
-        isRightSide ? [1.0, 1.0, 0.9, 0.8, 0.7] : [0.7, 0.8, 0.9, 1.0, 1.0];
-    opacity =
-        isRightSide ? [1.0, 1.0, 1.0, 0.5, 0.0] : [0.0, 0.5, 1.0, 1.0, 1.0];
+    scales = widget.scales ?? (isRightSide ? [1.0, 1.0, 0.9, 0.8, 0.7] : [0.7, 0.8, 0.9, 1.0, 1.0]);
+    opacity = isRightSide ? [1.0, 1.0, 1.0, 0.5, 0.0] : [0.0, 0.5, 1.0, 1.0, 1.0];
 
     _updateValues();
   }
@@ -943,9 +954,9 @@ class _StackViewState extends _CustomLayoutStateBase<_StackSwiper> {
 
     final offset = widget.scrollDirection == Axis.horizontal
         ? widget.axisDirection == AxisDirection.left
-            ? Offset(f, 0.0)
-            : Offset(-f, 0.0)
-        : Offset(0.0, f);
+            ? Offset(f + widget.itemOffsetX, 0.0)
+            : Offset(-f + widget.itemOffsetX, 0.0)
+        : Offset(0.0 + widget.itemOffsetX, f);
 
     final alignment = widget.scrollDirection == Axis.horizontal
         ? widget.axisDirection == AxisDirection.left

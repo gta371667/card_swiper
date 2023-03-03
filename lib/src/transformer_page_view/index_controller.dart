@@ -7,7 +7,9 @@ abstract class IndexControllerEventBase {
   final bool animation;
 
   final completer = Completer<void>();
+
   Future<void> get future => completer.future;
+
   void complete() {
     if (!completer.isCompleted) {
       completer.complete();
@@ -24,17 +26,22 @@ mixin TargetedPositionControllerEvent on IndexControllerEventBase {
 }
 mixin StepBasedIndexControllerEvent on TargetedPositionControllerEvent {
   int get step;
+
   int calcNextIndex({
     required int currentIndex,
     required int itemCount,
     required bool loop,
     required bool reverse,
   }) {
+    // 修正prev、next錯誤
+    final s = step < 0 ? 2 : -2;
+    final indexOffset = itemCount > 2 ? s : 0;
+
     var cIndex = currentIndex;
     if (reverse) {
-      cIndex -= step;
+      cIndex -= (step + indexOffset);
     } else {
-      cIndex += step;
+      cIndex += (step + indexOffset);
     }
 
     if (!loop) {
@@ -70,6 +77,7 @@ class PrevIndexControllerEvent extends IndexControllerEventBase
   }) : super(
           animation: animation,
         );
+
   @override
   int get step => -1;
 
@@ -77,10 +85,10 @@ class PrevIndexControllerEvent extends IndexControllerEventBase
   double get targetPosition => 0;
 }
 
-class MoveIndexControllerEvent extends IndexControllerEventBase
-    with TargetedPositionControllerEvent {
+class MoveIndexControllerEvent extends IndexControllerEventBase with TargetedPositionControllerEvent {
   final int newIndex;
   final int oldIndex;
+
   MoveIndexControllerEvent({
     required this.newIndex,
     required this.oldIndex,
@@ -88,6 +96,7 @@ class MoveIndexControllerEvent extends IndexControllerEventBase
   }) : super(
           animation: animation,
         );
+
   @override
   double get targetPosition => newIndex > oldIndex ? 1 : 0;
 }
@@ -95,6 +104,7 @@ class MoveIndexControllerEvent extends IndexControllerEventBase
 class IndexController extends ChangeNotifier {
   IndexControllerEventBase? event;
   int index = 0;
+
   Future move(int index, {bool animation = true}) {
     final e = event = MoveIndexControllerEvent(
       animation: animation,

@@ -102,8 +102,12 @@ class MoveIndexControllerEvent extends IndexControllerEventBase with TargetedPos
 }
 
 class IndexController extends ChangeNotifier {
+  final bool reversedMove;
+
   IndexControllerEventBase? event;
   int index = 0;
+
+  IndexController({required this.reversedMove});
 
   Future move(int index, {bool animation = true}) {
     final e = event = MoveIndexControllerEvent(
@@ -116,14 +120,26 @@ class IndexController extends ChangeNotifier {
   }
 
   Future next({bool animation = true}) {
-    final e = event = NextIndexControllerEvent(animation: animation);
+    // 因有調整calcNextIndex，造成切換變成倒敘，故跟previous對換
+    if (reversedMove) {
+      event = PrevIndexControllerEvent(animation: animation);
+    } else {
+      event = NextIndexControllerEvent(animation: animation);
+    }
+    // final e = event = NextIndexControllerEvent(animation: animation);
     notifyListeners();
-    return e.future;
+    return event!.future;
   }
 
   Future previous({bool animation = true}) {
-    final e = event = PrevIndexControllerEvent(animation: animation);
+    // 因有調整calcNextIndex，造成切換變成倒敘，故跟previous對換
+    if (reversedMove) {
+      event = NextIndexControllerEvent(animation: animation);
+    } else {
+      event = PrevIndexControllerEvent(animation: animation);
+    }
+    // final e = event = PrevIndexControllerEvent(animation: animation);
     notifyListeners();
-    return e.future;
+    return event!.future;
   }
 }

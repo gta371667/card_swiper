@@ -26,6 +26,7 @@ class AutoPlaySwiperControllerEvent extends IndexControllerEventBase {
   AutoPlaySwiperControllerEvent.start({
     required bool animation,
   }) : this(animation: animation, autoplay: true);
+
   AutoPlaySwiperControllerEvent.stop({
     required bool animation,
   }) : this(animation: animation, autoplay: false);
@@ -33,6 +34,8 @@ class AutoPlaySwiperControllerEvent extends IndexControllerEventBase {
 }
 
 class SwiperController extends IndexController {
+  SwiperController({bool reversedMove = false}) : super(reversedMove: reversedMove);
+
   void startAutoplay({bool animation = true}) {
     event = AutoPlaySwiperControllerEvent.start(animation: animation);
     notifyListeners();

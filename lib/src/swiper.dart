@@ -860,11 +860,9 @@ class _TinderState extends _CustomLayoutStateBase<_TinderSwiper> {
   void afterRender() {
     super.afterRender();
 
-    print('ddddddddddd qqqqqq ${widget.customScales}');
-
     _startIndex = -3;
     _animationCount = 5;
-    opacity = [0.0, 0.9, 0.9, 1.0, 0.0, 0.0];
+    opacity = [0.0, 1, 1, 1.0, 0.0, 0.0];
     scales = widget.customScales ?? [0.80, 0.80, 0.85, 0.90, 1.0, 1.0, 1.0];
     rotates = [0.0, 0.0, 0.0, 0.0, 20.0, 25.0];
     _updateValues();

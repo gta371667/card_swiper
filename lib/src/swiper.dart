@@ -132,6 +132,7 @@ class Swiper extends StatefulWidget {
   final List<double>? scales;
 
   final List<double>? offsetsY;
+  final List<double>? customScales;
 
   const Swiper({
     this.itemBuilder,
@@ -174,6 +175,7 @@ class Swiper extends StatefulWidget {
     this.itemOffsetX = 0,
     this.scales,
     this.offsetsY,
+    this.customScales,
   })  : assert(
           itemBuilder != null || transformer != null,
           'itemBuilder and transformItemBuilder must not be both null',
@@ -221,6 +223,7 @@ class Swiper extends StatefulWidget {
     PageIndicatorLayout indicatorLayout = PageIndicatorLayout.NONE,
     SwiperLayout layout = SwiperLayout.DEFAULT,
     List<double>? offsetsY,
+    List<double>? customScales,
   }) =>
       Swiper(
         fade: fade,
@@ -257,6 +260,7 @@ class Swiper extends StatefulWidget {
         },
         itemCount: children.length,
         offsetsY: offsetsY,
+        customScales: customScales,
       );
 
   static Swiper list<T>({
@@ -293,6 +297,7 @@ class Swiper extends StatefulWidget {
     PageIndicatorLayout indicatorLayout = PageIndicatorLayout.NONE,
     SwiperLayout layout = SwiperLayout.DEFAULT,
     List<double>? offsetsY,
+    List<double>? customScales,
   }) =>
       Swiper(
         fade: fade,
@@ -329,6 +334,7 @@ class Swiper extends StatefulWidget {
         },
         itemCount: list.length,
         offsetsY: offsetsY,
+        customScales: customScales,
       );
 
   @override
@@ -571,6 +577,7 @@ class _SwiperState extends _SwiperTimerMixin {
         controller: _controller,
         scrollDirection: widget.scrollDirection,
         offsetsY: widget.offsetsY,
+        customScales: widget.customScales,
       );
     } else if (widget.layout == SwiperLayout.CUSTOM) {
       return _CustomLayoutSwiper(
@@ -712,6 +719,7 @@ abstract class _SubSwiper extends StatefulWidget {
   final Axis? scrollDirection;
   final AxisDirection? axisDirection;
   final List<double>? offsetsY;
+  final List<double>? customScales;
 
   const _SubSwiper({
     Key? key,
@@ -728,6 +736,7 @@ abstract class _SubSwiper extends StatefulWidget {
     this.axisDirection = AxisDirection.left,
     this.onIndexChanged,
     this.offsetsY,
+    this.customScales,
   }) : super(key: key);
 
   @override
@@ -758,6 +767,7 @@ class _TinderSwiper extends _SubSwiper {
     required int itemCount,
     Axis? scrollDirection,
     List<double>? offsetsY,
+    List<double>? customScales,
   })  : assert(itemWidth != null && itemHeight != null),
         super(
           loop: loop,
@@ -773,6 +783,7 @@ class _TinderSwiper extends _SubSwiper {
           itemCount: itemCount,
           scrollDirection: scrollDirection,
           offsetsY: offsetsY,
+          customScales: customScales,
         );
 
   @override
@@ -849,10 +860,12 @@ class _TinderState extends _CustomLayoutStateBase<_TinderSwiper> {
   void afterRender() {
     super.afterRender();
 
+    print('ddddddddddd qqqqqq ${widget.customScales}');
+
     _startIndex = -3;
     _animationCount = 5;
     opacity = [0.0, 0.9, 0.9, 1.0, 0.0, 0.0];
-    scales = [0.80, 0.80, 0.85, 0.90, 1.0, 1.0, 1.0];
+    scales = widget.customScales ?? [0.80, 0.80, 0.85, 0.90, 1.0, 1.0, 1.0];
     rotates = [0.0, 0.0, 0.0, 0.0, 20.0, 25.0];
     _updateValues();
   }
